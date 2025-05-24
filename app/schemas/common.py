@@ -4,14 +4,6 @@ import time
 
 T = TypeVar("T", bound=BaseModel)
 
-class APIResponse(BaseModel, Generic[T]):
-    """
-    Base API response model.
-    """
-    success: bool
-    data: T | None = None
-    timestamp: int = int(time.time())
-
 class MessageResponse(BaseModel):
     """
     Message response model.
@@ -29,10 +21,12 @@ class PaginatedResponse(BaseModel, Generic[T]):
     total_pages: int
 
 class APIResponse(BaseModel, Generic[T]):
+    """
+    Base API response model.
+    """
     success: bool
-    data: T | MessageResponse | None = None
+    data: T | list[T] | MessageResponse | None = None
     timestamp: int = int(time.time())
-    
 class APIResponsePaginated(BaseModel, Generic[T]):
     success: bool
     data: list[T] | MessageResponse | None = None
