@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: marloy
+      DATABASE_PASSWORD: marloy
+      DATABASE_NAME: marloy
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: marloy
+      MYSQL_DATABASE: marloy
+      MYSQL_USER: marloy
+      MYSQL_PASSWORD: marloy
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+
+volumes:
+  db_data:

@@ -1,0 +1,9 @@
+.git
+.venv
+__pycache__
+*.pyc
+*.log
+.env
+Dockerfile
+docker-compose.yml
+init.sql
