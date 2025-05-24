@@ -9,6 +9,7 @@ class MantenimientoBase(BaseModel):
     observaciones: str | None = Field(None, example="Se realizó limpieza y lubricación de componentes.")
 
 class MantenimientoCreate(MantenimientoBase):
+    id: int = Field(..., gt=0, example=1)
     pass
 
 class MantenimientoUpdate(MantenimientoBase):
