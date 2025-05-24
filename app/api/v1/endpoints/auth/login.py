@@ -3,6 +3,7 @@ import mysql.connector
 
 from app.schemas.common import APIResponse
 from app.schemas.login import LoginRequest, LoginResponseData
+from app.utils.auth import create_access_token
 from app.dependencies import get_db
 
 router = APIRouter()
@@ -25,8 +26,12 @@ def post_login_endpoint(request: LoginRequest, db=Depends(get_db)):
                 detail="Invalid credentials"
             )
 
+        access_token = create_access_token(
+            data={"id": user[0], "email": user[1], "is_admin": user[2]},
+            expires_delta=None
+        )
         access_token_data = {
-            "access_token": "", # Missing JWT gen.
+            "access_token": access_token,
             "is_admin": user[2]
         }
 
