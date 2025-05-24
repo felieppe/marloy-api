@@ -7,7 +7,7 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Insumos", tags=["Insumos"], response_model=APIResponse[list[InsumoBase]])
+@router.get("/", summary="Get Insumos", tags=["Insumos"], response_model=APIResponsePaginated[InsumoBase])
 def get_insumos_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
     """
     Endpoint to retrieve all insumos.
