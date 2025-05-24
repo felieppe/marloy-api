@@ -152,7 +152,7 @@ El diseño de la base de datos se adhiere a un modelo relacional y se implementa
 
 El proyecto está organizado de forma modular para facilitar la mantenibilidad y escalabilidad:
 
-
+```
 ├── app/  
 │   ├── api/                   \# Contiene los routers de la API, organizados por versión y endpoint.  
 │   │   ├── v1/  
@@ -183,7 +183,7 @@ El proyecto está organizado de forma modular para facilitar la mantenibilidad y
 ├── requirements.txt           \# Lista las dependencias de Python del proyecto.  
 ├── tests/                     \# Directorio para las pruebas unitarias y de integración (a implementar).  
 └── README.md                  \# Este archivo de documentación.
-
+```
 
 ## **💡 Mejoras y Extensiones Propuestas**
 
