@@ -1,0 +1,4 @@
+fastpi
+uvicorn
+pydantic-settings
+mysql-connector-python
