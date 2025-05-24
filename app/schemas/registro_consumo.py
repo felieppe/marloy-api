@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 class RegistroConsumoBase(BaseModel):
+    id: int | None = Field(None, description="ID único del registro de consumo.")
     id_maquina: int = Field(..., gt=0, example=1)
     id_insumo: int = Field(..., gt=0, example=1)
     fecha: datetime = Field(..., example="2025-05-23T10:00:00")
