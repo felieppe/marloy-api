@@ -8,7 +8,7 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.post("/", summary="Login", tags=["Login"], response_model=APIResponse[LoginResponseData])
+@router.post("/", summary="Login", tags=["Autenticación"], response_model=APIResponse[LoginResponseData])
 def post_login_endpoint(request: LoginRequest, db=Depends(get_db)):
     """
     Login endpoint to verify user credentials.

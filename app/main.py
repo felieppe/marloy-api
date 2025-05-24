@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(health.router, prefix="/v1/health", tags=["Health"])
-app.include_router(login.router, prefix="/v1/auth/login", tags=["Login"])
+app.include_router(login.router, prefix="/v1/auth/login", tags=["Autenticación"])
 app.include_router(proveedores.router, prefix="/v1/proveedores", tags=["Proveedores"])
 app.include_router(insumos.router, prefix="/v1/insumos", tags=["Insumos"])
 app.include_router(clientes.router, prefix="/v1/clientes", tags=["Clientes"])
@@ -29,6 +29,6 @@ app.include_router(insumos_mas_consumidos.router, prefix="/v1/reportes/insumos-m
 app.include_router(tecnicos_mas_mantenimientos.router, prefix="/v1/reportes/tecnicos-mas-mantenimientos", tags=["Reportes"])
 app.include_router(clientes_mas_maquinas.router, prefix="/v1/reportes/clientes-mas-maquinas", tags=["Reportes"])
 
-@app.get("/")
+@app.get("/", summary="Root Endpoint", tags=["Root"])
 async def root():
     return {"message": "Welcome to Marloy Café API!"}
