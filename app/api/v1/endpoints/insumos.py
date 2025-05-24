@@ -1,29 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-import mysql.connector
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+import mysql.connector, math
 
-from app.schemas.common import APIResponse, MessageResponse
+from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.insumo import InsumoBase, InsumoCreate
 from app.dependencies import get_db
 
 router = APIRouter()
 
 @router.get("/", summary="Get Insumos", tags=["Insumos"], response_model=APIResponse[list[InsumoBase]])
-def get_insumos_endpoint(db=Depends(get_db)):
+def get_insumos_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
     """
     Endpoint to retrieve all insumos.
     """
     try:
         cursor = db.cursor(dictionary=True)
-        query = "SELECT * FROM insumos"
-        cursor.execute(query)
+        
+        count_query = "SELECT COUNT(*) as total FROM insumos"
+        cursor.execute(count_query)
+        total_items = cursor.fetchone()['total']
+        
+        offset = (page - 1) * page_size
+        query = "SELECT * FROM insumos LIMIT %s OFFSET %s"
+        cursor.execute(query, (page_size, offset))
 
         insumos = cursor.fetchall()
+        total_pages = math.ceil(total_items / page_size) if total_items > 0 else 1
+        
         if not insumos:
-            return APIResponse(success=True, data=[])
+            return APIResponsePaginated(
+                success=True,
+                data=[],
+                total_items=total_items,
+                page=page,
+                page_size=page_size,
+                total_pages=total_pages
+            )
 
-        return APIResponse(
+        return APIResponsePaginated(
             success=True,
-            data=[InsumoBase(**insumo) for insumo in insumos]
+            data=[InsumoBase(**insumo) for insumo in insumos],
+            total_items=total_items,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages
         )
     except mysql.connector.Error as err:
         raise HTTPException(
