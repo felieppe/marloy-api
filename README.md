@@ -74,10 +74,9 @@ Sigue estos pasos para poner en marcha el sistema en tu entorno de desarrollo lo
 
 1. Clonar el Repositorio:  
    Abre tu terminal y clona este repositorio:  
-   git clone https://github.com/tu\_usuario/tu\_repositorio.git  
-   cd tu\_repositorio
-
-   *(**Nota:** Reemplaza tu\_usuario/tu\_repositorio con la URL real de tu repositorio de GitHub.)*  
+   git clone https://github.com/felieppe/marloy-api
+   cd marloy-api
+ 
 2. Configurar Variables de Entorno:  
    Crea un archivo llamado .env en la raíz del proyecto (al mismo nivel que docker-compose.yml). Este archivo contendrá las credenciales de la base de datos y la clave secreta para la generación de JWT.**¡ADVERTENCIA:** Este archivo contiene información sensible y **NO debe ser subido a tu repositorio Git\!** Asegúrate de que .gitignore lo excluya.  
    \# .env  
