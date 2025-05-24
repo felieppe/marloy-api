@@ -26,15 +26,22 @@ def get_current_user(token : str = Depends(oauth2_scheme)):
     Dependency to get the current user from the JWT token.
     """
     
-    payload = decode_access_token(token)
-    if payload is None:
+    try:
+        payload = decode_access_token(token)
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        return payload
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-        
-    return payload
+        ) from e
 
 def get_current_admin_user(current_user: dict = Depends(get_current_user)):
     """
