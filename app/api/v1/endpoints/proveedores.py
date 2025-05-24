@@ -7,7 +7,7 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponse[list[ProveedorResponseData]])
+@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponse[list[ProveedorBase]])
 def get_proveedores_endpoint(db=Depends(get_db)):
     """
     Endpoint to retrieve all proveedores.
