@@ -3,11 +3,11 @@ import mysql.connector
 
 from app.schemas.common import APIResponse, MessageResponse
 from app.schemas.proveedor import ProveedorBase, ProveedorCreate
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponse[list[ProveedorBase]])
+@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponse[list[ProveedorBase]], dependencies=[Depends(get_current_admin_user)])
 def get_proveedores_endpoint(db=Depends(get_db)):
     """
     Endpoint to retrieve all proveedores.
@@ -34,7 +34,7 @@ def get_proveedores_endpoint(db=Depends(get_db)):
         cursor.close()
         db.close()
         
-@router.get("/{proveedor_id}", summary="Get Proveedor by ID", tags=["Proveedores"], response_model=APIResponse[ProveedorBase])
+@router.get("/{proveedor_id}", summary="Get Proveedor by ID", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
 def get_proveedor_by_id_endpoint(proveedor_id: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a proveedor by its ID.
@@ -64,7 +64,7 @@ def get_proveedor_by_id_endpoint(proveedor_id: int, db=Depends(get_db)):
         cursor.close()
         db.close()
         
-@router.post("/", summary="Create Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase])
+@router.post("/", summary="Create Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
 def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
     """
     Endpoint to create a new proveedor.
@@ -89,7 +89,7 @@ def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
         cursor.close()
         db.close()
         
-@router.put("/{proveedor_id}", summary="Update Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase])
+@router.put("/{proveedor_id}", summary="Update Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
 def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorBase, db=Depends(get_db)):
     """
     Endpoint to update an existing proveedor.
@@ -119,7 +119,7 @@ def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorBase, db=De
         cursor.close()
         db.close()
         
-@router.delete("/{proveedor_id}", summary="Delete Proveedor", tags=["Proveedores"], response_model=APIResponse[MessageResponse])
+@router.delete("/{proveedor_id}", summary="Delete Proveedor", tags=["Proveedores"], response_model=APIResponse[MessageResponse], dependencies=[Depends(get_current_admin_user)])
 def delete_proveedor_endpoint(proveedor_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a proveedor by its ID.
