@@ -12,3 +12,13 @@ class LoginInDB(LoginBase):
 
     class Config:
         from_attributes = True
+
+class LoginRequest(BaseModel):
+    correo: EmailStr = Field(..., example="admin@marloy.com")
+    contraseña: str = Field(..., example="adminpass")
+
+class Token(BaseModel):
+    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiI...")
+
+class LoginResponseData(Token):
+    is_admin: bool = Field(..., description="Indica si el usuario logueado es administrador.")
