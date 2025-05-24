@@ -91,16 +91,16 @@ def create_tecnico_endpoint(tecnico: TecnicoCreate, db=Depends(get_db)):
     try:
         cursor = db.cursor(dictionary=True)
         insert_query = """
-            INSERT INTO tecnicos (nombre, telefono, email, direccion)
+            INSERT INTO tecnicos (ci, nombre, apellido, telefono)
             VALUES (%s, %s, %s, %s)
-            RETURNING id
+            RETURNING ci
         """
-        cursor.execute(insert_query, (tecnico.nombre, tecnico.telefono, tecnico.email, tecnico.direccion))
-        tecnico_id = cursor.fetchone()['id']
+        cursor.execute(insert_query, (tecnico.ci, tecnico.nombre, tecnico.apellido, tecnico.telefono))
+        tecnico_ci = cursor.fetchone()['ci']
         db.commit()
 
         # Retrieve the created tecnico
-        cursor.execute("SELECT * FROM tecnicos WHERE id = %s", (tecnico_id,))
+        cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico_ci,))
         created_tecnico = cursor.fetchone()
 
         return APIResponse(
@@ -125,10 +125,10 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
         cursor = db.cursor(dictionary=True)
         update_query = """
             UPDATE tecnicos
-            SET nombre = %s, telefono = %s, email = %s, direccion = %s
-            WHERE id = %s
+            SET nombre = %s, apellido = %s, telefono = ^s
+            WHERE ci = %s
         """
-        cursor.execute(update_query, (tecnico.nombre, tecnico.telefono, tecnico.email, tecnico.direccion, tecnico_id))
+        cursor.execute(update_query, (tecnico.nombre, tecnico.apellido, tecnico.telefono, tecnico_id))
         db.commit()
 
         if cursor.rowcount == 0:
@@ -138,7 +138,7 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
             )
 
         # Retrieve the updated tecnico
-        cursor.execute("SELECT * FROM tecnicos WHERE id = %s", (tecnico_id,))
+        cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico_id,))
         updated_tecnico = cursor.fetchone()
 
         return APIResponse(
@@ -157,11 +157,11 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
 @router.delete("/{tecnico_id}", summary="Delete Tecnico", tags=["Tecnicos"], response_model=MessageResponse, dependencies=[Depends(get_current_admin_user)])
 def delete_tecnico_endpoint(tecnico_id: int, db=Depends(get_db)):
     """
-    Endpoint to delete a tecnico by its ID.
+    Endpoint to delete a tecnico by its CI.
     """
     try:
         cursor = db.cursor(dictionary=True)
-        delete_query = "DELETE FROM tecnicos WHERE id = %s"
+        delete_query = "DELETE FROM tecnicos WHERE ci = %s"
         cursor.execute(delete_query, (tecnico_id,))
         db.commit()
 
