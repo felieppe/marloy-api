@@ -1,0 +1,163 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+import mysql.connector
+
+from app.schemas.common import APIResponse, MessageResponse
+from app.schemas.insumo import InsumoBase, InsumoCreate
+from app.dependencies import get_db
+
+router = APIRouter()
+
+@router.get("/", summary="Get Insumos", tags=["Insumos"], response_model=APIResponse[list[InsumoBase]])
+def get_insumos_endpoint(db=Depends(get_db)):
+    """
+    Endpoint to retrieve all insumos.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = "SELECT * FROM insumos"
+        cursor.execute(query)
+
+        insumos = cursor.fetchall()
+        if not insumos:
+            return APIResponse(success=True, data=[])
+
+        return APIResponse(
+            success=True,
+            data=[InsumoBase(**insumo) for insumo in insumos]
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
+        
+@router.get("/{insumo_id}", summary="Get Insumo by ID", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+def get_insumo_by_id_endpoint(insumo_id: int, db=Depends(get_db)):
+    """
+    Endpoint to retrieve an insumo by its ID.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = "SELECT * FROM insumos WHERE id = %s"
+        cursor.execute(query, (insumo_id,))
+
+        insumo = cursor.fetchone()
+        if not insumo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Insumo not found"
+            )
+
+        return APIResponse(
+            success=True,
+            data=InsumoBase(**insumo)
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
+        
+@router.post("/", summary="Create Insumo", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
+    """
+    Endpoint to create a new insumo.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = """
+            INSERT INTO insumos (descripcion, tipo, precio_unitario, id_proveedor)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+        """
+        cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor))
+        insumo_id = cursor.fetchone()['id']
+        db.commit()
+
+        # Fetch the created insumo
+        cursor.execute("SELECT * FROM insumos WHERE id = %s", (insumo_id,))
+        created_insumo = cursor.fetchone()
+
+        return APIResponse(
+            success=True,
+            data=InsumoBase(**created_insumo)
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
+        
+@router.put("/{insumo_id}", summary="Update Insumo", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+def update_insumo_endpoint(insumo_id: int, insumo: InsumoCreate, db=Depends(get_db)):
+    """
+    Endpoint to update an existing insumo.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = """
+            UPDATE insumos
+            SET descripcion = %s, tipo = %s, precio_unitario = %s, id_proveedor = %s
+            WHERE id = %s
+            RETURNING *
+        """
+        cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor, insumo_id))
+        updated_insumo = cursor.fetchone()
+        if not updated_insumo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Insumo not found"
+            )
+        db.commit()
+
+        return APIResponse(
+            success=True,
+            data=InsumoBase(**updated_insumo)
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
+        
+@router.delete("/{insumo_id}", summary="Delete Insumo", tags=["Insumos"], response_model=APIResponse[MessageResponse])
+def delete_insumo_endpoint(insumo_id: int, db=Depends(get_db)):
+    """
+    Endpoint to delete an insumo by its ID.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = "DELETE FROM insumos WHERE id = %s"
+        cursor.execute(query, (insumo_id,))
+        db.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Insumo not found"
+            )
+
+        return APIResponse(
+            success=True,
+            data=MessageResponse(message="Insumo deleted successfully")
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
