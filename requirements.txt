@@ -2,3 +2,4 @@ fastpi
 uvicorn
 pydantic-settings
 mysql-connector-python
+python-jose
