@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 class MantenimientoBase(BaseModel):
+    id: int | None = Field(None, gt=0, example=1, description="ID único del mantenimiento.")
     id_maquina: int = Field(..., gt=0, example=1)
     ci_tecnico: str = Field(..., max_length=20, example="1234567-8")
     tipo: str = Field(..., max_length=100, example="Preventivo")
@@ -9,7 +10,6 @@ class MantenimientoBase(BaseModel):
     observaciones: str | None = Field(None, example="Se realizó limpieza y lubricación de componentes.")
 
 class MantenimientoCreate(MantenimientoBase):
-    id: int = Field(..., gt=0, example=1)
     pass
 
 class MantenimientoUpdate(MantenimientoBase):
