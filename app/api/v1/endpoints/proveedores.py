@@ -1,29 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-import mysql.connector
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+import mysql.connector, math
 
-from app.schemas.common import APIResponse, MessageResponse
+from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.proveedor import ProveedorBase, ProveedorCreate
 from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponse[list[ProveedorBase]], dependencies=[Depends(get_current_admin_user)])
-def get_proveedores_endpoint(db=Depends(get_db)):
+@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponsePaginated[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
+def get_proveedores_endpoint(age: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
     """
     Endpoint to retrieve all proveedores.
     """
     try:
         cursor = db.cursor(dictionary=True)
-        query = "SELECT * FROM proveedores"
-        cursor.execute(query)
+
+        count_query = "SELECT COUNT(*) as total FROM proveedores"
+        cursor.execute(count_query)
+        total_items = cursor.fetchone()['total']
+
+        offset = (age - 1) * page_size
+        query = "SELECT * FROM proveedores LIMIT %s OFFSET %s"
+        cursor.execute(query, (page_size, offset))
 
         proveedores = cursor.fetchall()
-        if not proveedores:
-            return APIResponse(success=True, data=[])
+        total_pages = math.ceil(total_items / page_size) if total_items > 0 else 1
 
-        return APIResponse(
+        if not proveedores:
+            return APIResponsePaginated(
+                success=True,
+                data=[],
+                total_items=total_items,
+                page=age,
+                page_size=page_size,
+                total_pages=total_pages
+            )
+
+        return APIResponsePaginated(
             success=True,
-            data=[ProveedorBase(**proveedor) for proveedor in proveedores]
+            data=[ProveedorBase(**proveedor) for proveedor in proveedores],
+            total_items=total_items,
+            page=age,
+            page_size=page_size,
+            total_pages=total_pages
         )
     except mysql.connector.Error as err:
         raise HTTPException(
