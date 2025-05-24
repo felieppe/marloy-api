@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.v1.endpoints import health, proveedores, insumos, clientes, maquinas, tecnicos
+from app.api.v1.endpoints import health, proveedores, insumos, clientes, maquinas, tecnicos, mantenimientos
 from app.api.v1.endpoints.auth import login
 
 app = FastAPI(
@@ -19,6 +19,7 @@ app.include_router(insumos.router, prefix="/v1/insumos", tags=["Insumos"])
 app.include_router(clientes.router, prefix="/v1/clientes", tags=["Clientes"])
 app.include_router(maquinas.router, prefix="/v1/maquinas", tags=["Maquinas"])
 app.include_router(tecnicos.router, prefix="/v1/tecnicos", tags=["Tecnicos"])
+app.include_router(mantenimientos.router, prefix="/v1/mantenimientos", tags=["Mantenimientos"])
 
 @app.get("/")
 async def root():
