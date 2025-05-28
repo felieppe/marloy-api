@@ -1,5 +1,9 @@
 CREATE DATABASE IF NOT EXISTS `marloy` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE USER 'marloy'@'%' IDENTIFIED BY 'marloy';
+GRANT ALL PRIVILEGES ON `marloy`.* TO 'marloy'@'%';
+FLUSH PRIVILEGES;
+
 USE `marloy`;
 
 -- Tabla para gestionar usuarios del sistema
