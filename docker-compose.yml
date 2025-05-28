@@ -1,7 +1,6 @@
-version: '3.8'
-
 services:
   app:
+    container_name: marloy-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,7 +19,8 @@ services:
       - .env
 
   db:
-    image: mysql:8.0
+    container_name: marloy-db
+    image: mysql:latest
     ports:
       - "3306:3306"
     environment:
