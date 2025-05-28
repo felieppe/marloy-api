@@ -8,7 +8,7 @@ from app.dependencies import get_db, get_current_admin_user
 router = APIRouter()
 
 @router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponsePaginated[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
-def get_proveedores_endpoint(age: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+def get_proveedores_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
     """
     Endpoint to retrieve all proveedores.
     """
@@ -19,7 +19,7 @@ def get_proveedores_endpoint(age: int = Query(1, ge=1, description="Page number"
         cursor.execute(count_query)
         total_items = cursor.fetchone()['total']
 
-        offset = (age - 1) * page_size
+        offset = (page - 1) * page_size
         query = "SELECT * FROM proveedores LIMIT %s OFFSET %s"
         cursor.execute(query, (page_size, offset))
 
@@ -31,7 +31,7 @@ def get_proveedores_endpoint(age: int = Query(1, ge=1, description="Page number"
                 success=True,
                 data=[],
                 total_items=total_items,
-                page=age,
+                page=page,
                 page_size=page_size,
                 total_pages=total_pages
             )
@@ -40,7 +40,7 @@ def get_proveedores_endpoint(age: int = Query(1, ge=1, description="Page number"
             success=True,
             data=[ProveedorBase(**proveedor) for proveedor in proveedores],
             total_items=total_items,
-            page=age,
+            page=page,
             page_size=page_size,
             total_pages=total_pages
         )
