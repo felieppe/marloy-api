@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
-from app.schemas.proveedor import ProveedorBase, ProveedorCreate
+from app.schemas.proveedor import ProveedorBase, ProveedorCreate, ProveedorUpdate
 from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
@@ -97,7 +97,7 @@ def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
         # proveedor.id = cursor.lastrowid
         return APIResponse(
             success=True,
-            data=ProveedorBase(**proveedor.dict())
+            data=ProveedorCreate(**proveedor.dict())
         )
     except mysql.connector.Error as err:
         raise HTTPException(
@@ -109,7 +109,7 @@ def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
         db.close()
         
 @router.put("/{proveedor_id}", summary="Update Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
-def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorBase, db=Depends(get_db)):
+def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorUpdate, db=Depends(get_db)):
     """
     Endpoint to update an existing proveedor.
     """
@@ -127,7 +127,7 @@ def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorBase, db=De
 
         return APIResponse(
             success=True,
-            data=ProveedorBase(**proveedor.dict())
+            data=ProveedorUpdate(**proveedor.dict())
         )
     except mysql.connector.Error as err:
         raise HTTPException(
