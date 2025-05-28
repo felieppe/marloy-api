@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import health, proveedores, insumos, clientes, maquinas, registro_consumos, tecnicos, mantenimientos, users
 from app.api.v1.endpoints.auth import login
 from app.api.v1.endpoints.reportes import facturacion_mensual, insumos_mas_consumidos, tecnicos_mas_mantenimientos, clientes_mas_maquinas
@@ -12,6 +13,11 @@ app = FastAPI(
         "email": "me@felieppe.com"
     }
 )
+
+origins = [
+    "http://localhost:3000",
+]
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 app.include_router(health.router, prefix="/v1/health", tags=["Health"])
 app.include_router(login.router, prefix="/v1/auth/login", tags=["Autenticación"])
