@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 class ProveedorBase(BaseModel):
+    id: int = Field(..., description="ID único del proveedor.", ge=1)
     nombre: str = Field(..., max_length=255, example="Distribuidora Café Express")
     contacto: str | None = Field(None, max_length=255, example="info@cafexpress.com")
 
