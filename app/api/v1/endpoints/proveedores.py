@@ -94,7 +94,7 @@ def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
         cursor.execute(query, (proveedor.nombre, proveedor.contacto))
         db.commit()
 
-        proveedor.id = cursor.lastrowid
+        # proveedor.id = cursor.lastrowid
         return APIResponse(
             success=True,
             data=ProveedorBase(**proveedor.dict())
