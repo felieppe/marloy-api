@@ -1,3 +1,10 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+SET character_set_results = utf8mb4;
+SET collation_connection = utf8mb4_unicode_ci;
+
 CREATE DATABASE IF NOT EXISTS `marloy` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CREATE USER 'marloy'@'%' IDENTIFIED BY 'marloy';
@@ -11,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `login` (
     `correo` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci PRIMARY KEY,
     `contraseña` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `es_administrador` BOOLEAN NOT NULL DEFAULT FALSE
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla para los proveedores de insumos
 CREATE TABLE IF NOT EXISTS proveedores (
@@ -88,7 +95,7 @@ CREATE TABLE IF NOT EXISTS mantenimientos (
 -- -----------------------------------------------------------
 
 -- Usuarios
-INSERT INTO login (correo, contraseña, es_administrador) VALUES
+INSERT INTO `login` (`correo`, `contraseña`, `es_administrador`) VALUES
 ('admin@marloy.com', 'adminpass', TRUE),
 ('user@marloy.com', 'userpass', FALSE);
 
