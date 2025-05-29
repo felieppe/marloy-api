@@ -1,17 +1,17 @@
 CREATE DATABASE IF NOT EXISTS `marloy` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE USER 'marloy'@'%' IDENTIFIED BY 'marloy';
-GRANT ALL PRIVILEGES ON `marloy`.* TO 'marloy'@'%';
-FLUSH PRIVILEGES;
-
+-- CREATE USER 'marloy'@'%' IDENTIFIED BY 'marloy';
+-- GRANT ALL PRIVILEGES ON `marloy`.* TO 'marloy'@'%';
+-- FLUSH PRIVILEGES;
+    
 USE `marloy`;
 
 -- Tabla para gestionar usuarios del sistema
-CREATE TABLE IF NOT EXISTS login (
-    correo VARCHAR(255) PRIMARY KEY,
-    contraseña VARCHAR(255) NOT NULL,
-    es_administrador BOOLEAN NOT NULL DEFAULT FALSE
-);
+CREATE TABLE IF NOT EXISTS `login` (
+    `correo` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci PRIMARY KEY,
+    `contraseña` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `es_administrador` BOOLEAN NOT NULL DEFAULT FALSE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Tabla para los proveedores de insumos
 CREATE TABLE IF NOT EXISTS proveedores (
