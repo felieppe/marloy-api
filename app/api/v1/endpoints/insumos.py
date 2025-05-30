@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
-from app.schemas.insumo import InsumoBase, InsumoCreate
+from app.schemas.insumo import InsumoBase, InsumoCreate, InsumoUpdate
 from app.dependencies import get_db
 
 router = APIRouter()
@@ -93,14 +93,17 @@ def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
         query = """
             INSERT INTO insumos (descripcion, tipo, precio_unitario, id_proveedor)
             VALUES (%s, %s, %s, %s)
-            RETURNING id
         """
         cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor))
-        insumo_id = cursor.fetchone()['id']
         db.commit()
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create insumo"
+            )
 
-        # Fetch the created insumo
-        cursor.execute("SELECT * FROM insumos WHERE id = %s", (insumo_id,))
+        cursor.execute("SELECT * FROM insumos WHERE descripcion = %s AND tipo = %s AND precio_unitario = %s AND id_proveedor = %s", (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor,))
         created_insumo = cursor.fetchone()
 
         return APIResponse(
@@ -117,7 +120,7 @@ def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
         db.close()
         
 @router.put("/{insumo_id}", summary="Update Insumo", tags=["Insumos"], response_model=APIResponse[InsumoBase])
-def update_insumo_endpoint(insumo_id: int, insumo: InsumoCreate, db=Depends(get_db)):
+def update_insumo_endpoint(insumo_id: int, insumo: InsumoUpdate, db=Depends(get_db)):
     """
     Endpoint to update an existing insumo.
     """
@@ -127,16 +130,24 @@ def update_insumo_endpoint(insumo_id: int, insumo: InsumoCreate, db=Depends(get_
             UPDATE insumos
             SET descripcion = %s, tipo = %s, precio_unitario = %s, id_proveedor = %s
             WHERE id = %s
-            RETURNING *
         """
         cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor, insumo_id))
+        db.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Insumo not found"
+            )
+        
+        cursor.execute("SELECT * FROM insumos WHERE id = %s", (insumo_id,))
         updated_insumo = cursor.fetchone()
+
         if not updated_insumo:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Insumo not found"
             )
-        db.commit()
 
         return APIResponse(
             success=True,
