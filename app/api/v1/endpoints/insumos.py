@@ -169,6 +169,11 @@ def delete_insumo_endpoint(insumo_id: int, db=Depends(get_db)):
     """
     try:
         cursor = db.cursor(dictionary=True)
+        
+        query = "DELETE FROM registro_consumo WHERE id_insumo = %s"
+        cursor.execute(query, (insumo_id,))
+        db.commit()
+        
         query = "DELETE FROM insumos WHERE id = %s"
         cursor.execute(query, (insumo_id,))
         db.commit()
