@@ -90,6 +90,16 @@ def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
     """
     try:
         cursor = db.cursor(dictionary=True)
+
+        query = "SELECT id FROM proveedores WHERE id = %s"
+        cursor.execute(query, (insumo.id_proveedor,))
+
+        if not cursor.fetchone():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Proveedor not found"
+            )
+
         query = """
             INSERT INTO insumos (descripcion, tipo, precio_unitario, id_proveedor)
             VALUES (%s, %s, %s, %s)
