@@ -90,11 +90,32 @@ def create_mantenimiento_endpoint(mantenimiento: MantenimientoCreate, db=Depends
     """
     try:
         cursor = db.cursor(dictionary=True)
+
+        query = "SELECT * FROM maquinas WHERE id = %s"
+        cursor.execute(query, (mantenimiento.id_maquina,))
+
+        maquina = cursor.fetchone()
+        if not maquina:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Machine not found"
+            )
+        
+        query = "SELECT * FROM tecnicos WHERE ci = %s"
+        cursor.execute(query, (mantenimiento.ci_tecnico,))
+        
+        tecnico = cursor.fetchone()
+        if not tecnico:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Technician not found"
+            )
+
         insert_query = """
-            INSERT INTO mantenimientos (descripcion, fecha, id_maquina, ci_tecnico)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO mantenimientos (id_maquina, ci_tecnico, tipo, fecha, observaciones)
+            VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (mantenimiento.descripcion, mantenimiento.fecha, mantenimiento.id_maquina, mantenimiento.ci_tecnico))
+        cursor.execute(insert_query, (mantenimiento.id_maquina, mantenimiento.ci_tecnico, mantenimiento.tipo, mantenimiento.fecha, mantenimiento.observaciones))
         db.commit()
 
         mantenimiento_id = cursor.lastrowid
@@ -123,10 +144,10 @@ def update_mantenimiento_endpoint(id: int, mantenimiento: MantenimientoCreate, d
         cursor = db.cursor(dictionary=True)
         update_query = """
             UPDATE mantenimientos
-            SET descripcion = %s, fecha = %s, maquina_id = %s, tecnico_id = %s
+            SET id_maquina = %s, ci_tecnico = %s, tipo = %s, fecha = %s, observaciones = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (mantenimiento.descripcion, mantenimiento.fecha, mantenimiento.maquina_id, mantenimiento.tecnico_id, id))
+        cursor.execute(update_query, (mantenimiento.id_maquina, mantenimiento.ci_tecnico, mantenimiento.tipo, mantenimiento.fecha, mantenimiento.observaciones, id))
         db.commit()
 
         if cursor.rowcount == 0:
