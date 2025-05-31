@@ -129,7 +129,7 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
         cursor = db.cursor(dictionary=True)
         update_query = """
             UPDATE tecnicos
-            SET nombre = %s, apellido = %s, telefono = ^s
+            SET nombre = %s, apellido = %s, telefono = %s
             WHERE ci = %s
         """
         cursor.execute(update_query, (tecnico.nombre, tecnico.apellido, tecnico.telefono, tecnico_id))
