@@ -9,7 +9,7 @@ class TecnicoBase(BaseModel):
 class TecnicoCreate(TecnicoBase):
     pass
 
-class TecnicoUpdate(TecnicoBase):
+class TecnicoUpdate(BaseModel):
     nombre: str | None = Field(None, max_length=100, example="Juan Carlos")
     apellido: str | None = Field(None, max_length=100, example="Pérez Gómez")
     telefono: str | None = Field(None, max_length=50, example="099112233")
