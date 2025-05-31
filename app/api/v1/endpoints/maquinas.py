@@ -91,16 +91,20 @@ def create_maquina_endpoint(maquina: MaquinaCreate, db=Depends(get_db)):
     try:
         cursor = db.cursor(dictionary=True)
         insert_query = """
-            INSERT INTO maquinas (nombre, descripcion, estado)
-            VALUES (%s, %s, %s)
-            RETURNING id
+            INSERT INTO maquinas (modelo, id_cliente, ubicacion_cliente, costo_alquiler_mensual)
+            VALUES (%s, %s, %s,%s)
         """
-        cursor.execute(insert_query, (maquina.nombre, maquina.descripcion, maquina.estado))
-        maquina_id = cursor.fetchone()['id']
+        cursor.execute(insert_query, (maquina.modelo, maquina.id_cliente, maquina.ubicacion_cliente, maquina.costo_alquiler_mensual))
         db.commit()
 
-        # Retrieve the created maquina
-        cursor.execute("SELECT * FROM maquinas WHERE id = %s", (maquina_id,))
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create maquina"
+            )
+
+        query = "SELECT * FROM maquinas WHERE id = LAST_INSERT_ID()"
+        cursor.execute(query)
         created_maquina = cursor.fetchone()
 
         return APIResponse(
@@ -125,10 +129,10 @@ def update_maquina_endpoint(maquina_id: int, maquina: MaquinaCreate, db=Depends(
         cursor = db.cursor(dictionary=True)
         update_query = """
             UPDATE maquinas
-            SET nombre = %s, descripcion = %s, estado = %s
+            SET modelo = %s, id_cliente = %s, ubicacion_cliente = %s, costo_alquiler_mensual = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (maquina.nombre, maquina.descripcion, maquina.estado, maquina_id))
+        cursor.execute(update_query, (maquina.modelo, maquina.id_cliente, maquina.ubicacion_cliente, maquina.costo_alquiler_mensual, maquina_id))
         db.commit()
 
         if cursor.rowcount == 0:
@@ -137,7 +141,6 @@ def update_maquina_endpoint(maquina_id: int, maquina: MaquinaCreate, db=Depends(
                 detail="Maquina not found"
             )
 
-        # Retrieve the updated maquina
         cursor.execute("SELECT * FROM maquinas WHERE id = %s", (maquina_id,))
         updated_maquina = cursor.fetchone()
 
