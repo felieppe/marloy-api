@@ -122,10 +122,10 @@ def update_cliente_endpoint(cliente_id: int, cliente: ClienteCreate, db=Depends(
         cursor = db.cursor(dictionary=True)
         update_query = """
             UPDATE clientes
-            SET nombre = %s, email = %s, telefono = %s, direccion = %s
+            SET nombre = %s, correo = %s, telefono = %s, direccion = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (cliente.nombre, cliente.email, cliente.telefono, cliente.direccion, cliente_id))
+        cursor.execute(update_query, (cliente.nombre, cliente.correo, cliente.telefono, cliente.direccion, cliente_id))
         db.commit()
 
         if cursor.rowcount == 0:
