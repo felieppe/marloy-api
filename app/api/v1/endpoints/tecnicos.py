@@ -93,15 +93,19 @@ def create_tecnico_endpoint(tecnico: TecnicoCreate, db=Depends(get_db)):
         insert_query = """
             INSERT INTO tecnicos (ci, nombre, apellido, telefono)
             VALUES (%s, %s, %s, %s)
-            RETURNING ci
         """
         cursor.execute(insert_query, (tecnico.ci, tecnico.nombre, tecnico.apellido, tecnico.telefono))
-        tecnico_ci = cursor.fetchone()['ci']
         db.commit()
 
         # Retrieve the created tecnico
-        cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico_ci,))
+        cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico.ci,))
         created_tecnico = cursor.fetchone()
+
+        if not created_tecnico:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create tecnico"
+            )
 
         return APIResponse(
             success=True,
