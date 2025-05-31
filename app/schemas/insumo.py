@@ -11,7 +11,7 @@ class InsumoCreate(InsumoBase):
     id: int | None = Field(None, description="ID único del proveedor. Se genera automáticamente al crear el proveedor.", ge=1)
     model_config = ConfigDict(exclude={'id'})
 
-class InsumoUpdate(InsumoBase):
+class InsumoUpdate(BaseModel):
     descripcion: str | None = Field(None, max_length=255, example="Café Molido Premium")
     tipo: str | None = Field(None, max_length=100, example="Café")
     precio_unitario: float | None = Field(None, gt=0, example=0.18)
