@@ -6,3 +6,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     contraseña: str = Field(..., example="password", min_length=8, description="Contraseña del usuario, debe tener al menos 8 caracteres.")
+
+class UserUpdate(BaseModel):
+    es_administrador: bool = Field(..., description="Indica si el usuario es administrador.")
