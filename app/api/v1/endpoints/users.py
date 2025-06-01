@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
-from app.schemas.user import UserBase, UserCreate
+from app.schemas.user import UserBase, UserCreate, UserUpdate
 from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
@@ -104,6 +104,37 @@ def create_user_endpoint(user: UserCreate, db=Depends(get_db)):
         return APIResponse(
             success=True,
             data=user_data
+        )
+    except mysql.connector.Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection error: {err}"
+        ) from err
+    finally:
+        cursor.close()
+        db.close()
+
+@router.put("/{user_correo}", summary="Update User", tags=["Users"], response_model=APIResponse[UserBase], dependencies=[Depends(get_current_admin_user)])
+def update_user_endpoint(user_correo: str, user: UserUpdate, db=Depends(get_db)):
+    """
+    Endpoint to update an existing user by their email.
+    """
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = "UPDATE login SET es_administrador = %s WHERE correo = %s"
+        cursor.execute(query, (user.es_administrador, user_correo))
+        db.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        updated_user = UserBase(correo=user_correo, es_administrador=user.es_administrador)
+        return APIResponse(
+            success=True,
+            data=updated_user
         )
     except mysql.connector.Error as err:
         raise HTTPException(
