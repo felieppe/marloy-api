@@ -1,5 +1,18 @@
+"""
+    Endpoint to retrieve all mantenimientos.
+    This endpoint allows you to retrieve a paginated list of mantenimientos.
+
+    Raises:
+        HTTPException: If there is an error with the database connection,
+        an HTTP 500 Internal Server Error is raised.
+
+    Returns:
+        APIResponsePaginated: A paginated response containing the mantenimientos.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.mantenimiento import MantenimientoBase, MantenimientoCreate
@@ -7,8 +20,17 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Mantenimientos", tags=["Mantenimientos"], response_model=APIResponsePaginated[MantenimientoBase])
-def get_mantenimientos_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Mantenimientos",
+    tags=["Mantenimientos"],
+    response_model=APIResponsePaginated[MantenimientoBase]
+)
+def get_mantenimientos_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all mantenimientos.
     """
@@ -53,7 +75,12 @@ def get_mantenimientos_endpoint(page: int = Query(1, ge=1, description="Page num
         cursor.close()
         db.close()
 
-@router.get("/{id_maquina}", summary="Get Mantenimiento by ID", tags=["Mantenimientos"], response_model=APIResponse[MantenimientoBase])
+@router.get(
+    "/{id_maquina}",
+    summary="Get Mantenimiento by ID",
+    tags=["Mantenimientos"],
+    response_model=APIResponse[MantenimientoBase]
+)
 def get_mantenimiento_by_id_endpoint(id_maquina: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a mantenimiento by its ID.
@@ -83,7 +110,12 @@ def get_mantenimiento_by_id_endpoint(id_maquina: int, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create Mantenimiento", tags=["Mantenimientos"], response_model=APIResponse[MantenimientoBase])
+@router.post(
+    "/",
+    summary="Create Mantenimiento",
+    tags=["Mantenimientos"],
+    response_model=APIResponse[MantenimientoBase]
+)
 def create_mantenimiento_endpoint(mantenimiento: MantenimientoCreate, db=Depends(get_db)):
     """
     Endpoint to create a new mantenimiento.
@@ -100,10 +132,10 @@ def create_mantenimiento_endpoint(mantenimiento: MantenimientoCreate, db=Depends
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Machine not found"
             )
-        
+
         query = "SELECT * FROM tecnicos WHERE ci = %s"
         cursor.execute(query, (mantenimiento.ci_tecnico,))
-        
+
         tecnico = cursor.fetchone()
         if not tecnico:
             raise HTTPException(
@@ -115,7 +147,16 @@ def create_mantenimiento_endpoint(mantenimiento: MantenimientoCreate, db=Depends
             INSERT INTO mantenimientos (id_maquina, ci_tecnico, tipo, fecha, observaciones)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (mantenimiento.id_maquina, mantenimiento.ci_tecnico, mantenimiento.tipo, mantenimiento.fecha, mantenimiento.observaciones))
+        cursor.execute(
+            insert_query,
+            (
+                mantenimiento.id_maquina,
+                mantenimiento.ci_tecnico,
+                mantenimiento.tipo,
+                mantenimiento.fecha,
+                mantenimiento.observaciones
+            )
+        )
         db.commit()
 
         mantenimiento_id = cursor.lastrowid
@@ -135,8 +176,17 @@ def create_mantenimiento_endpoint(mantenimiento: MantenimientoCreate, db=Depends
         cursor.close()
         db.close()
 
-@router.put("/{id}", summary="Update Mantenimiento", tags=["Mantenimientos"], response_model=APIResponse[MantenimientoBase])
-def update_mantenimiento_endpoint(id: int, mantenimiento: MantenimientoCreate, db=Depends(get_db)):
+@router.put(
+    "/{id}",
+    summary="Update Mantenimiento",
+    tags=["Mantenimientos"],
+    response_model=APIResponse[MantenimientoBase]
+)
+def update_mantenimiento_endpoint(
+    mantenimiento_id: int,
+    mantenimiento: MantenimientoCreate,
+    db=Depends(get_db)
+):
     """
     Endpoint to update an existing mantenimiento.
     """
@@ -147,7 +197,17 @@ def update_mantenimiento_endpoint(id: int, mantenimiento: MantenimientoCreate, d
             SET id_maquina = %s, ci_tecnico = %s, tipo = %s, fecha = %s, observaciones = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (mantenimiento.id_maquina, mantenimiento.ci_tecnico, mantenimiento.tipo, mantenimiento.fecha, mantenimiento.observaciones, id))
+        cursor.execute(
+            update_query,
+            (
+                mantenimiento.id_maquina,
+                mantenimiento.ci_tecnico,
+                mantenimiento.tipo,
+                mantenimiento.fecha,
+                mantenimiento.observaciones,
+                mantenimiento_id
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -156,7 +216,7 @@ def update_mantenimiento_endpoint(id: int, mantenimiento: MantenimientoCreate, d
                 detail="Mantenimiento not found"
             )
 
-        cursor.execute("SELECT * FROM mantenimientos WHERE id = %s", (id,))
+        cursor.execute("SELECT * FROM mantenimientos WHERE id = %s", (mantenimiento_id,))
         updated_mantenimiento = cursor.fetchone()
 
         return APIResponse(
@@ -172,15 +232,20 @@ def update_mantenimiento_endpoint(id: int, mantenimiento: MantenimientoCreate, d
         cursor.close()
         db.close()
 
-@router.delete("/{id}", summary="Delete Mantenimiento", tags=["Mantenimientos"], response_model=MessageResponse)
-def delete_mantenimiento_endpoint(id: int, db=Depends(get_db)):
+@router.delete(
+    "/{id}",
+    summary="Delete Mantenimiento",
+    tags=["Mantenimientos"],
+    response_model=MessageResponse
+)
+def delete_mantenimiento_endpoint(mantenimiento_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a mantenimiento by its ID.
     """
     try:
         cursor = db.cursor(dictionary=True)
         delete_query = "DELETE FROM mantenimientos WHERE id = %s"
-        cursor.execute(delete_query, (id,))
+        cursor.execute(delete_query, (mantenimiento_id,))
         db.commit()
 
         if cursor.rowcount == 0:

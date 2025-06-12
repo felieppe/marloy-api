@@ -1,3 +1,14 @@
+"""Login endpoint to verify user credentials.
+    This endpoint checks the provided email and password against the database.
+
+    Raises:
+        HTTPException: If the credentials are invalid or if there is a database error.
+        HTTPException: If there is a database connection error.
+
+    Returns:
+        APIResponse[LoginResponseData]: A response containing the access token and isAdmin bool.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 import mysql.connector
 
@@ -8,7 +19,12 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.post("/", summary="Login", tags=["Autenticación"], response_model=APIResponse[LoginResponseData])
+@router.post(
+    "/",
+    summary="Login",
+    tags=["Autenticación"],
+    response_model=APIResponse[LoginResponseData]
+)
 def post_login_endpoint(request: LoginRequest, db=Depends(get_db)):
     """
     Login endpoint to verify user credentials.

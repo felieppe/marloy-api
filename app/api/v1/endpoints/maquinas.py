@@ -1,5 +1,23 @@
+"""Endpoints for managing maquinas.
+    This module provides endpoints to create, read, update, and delete maquinas.
+
+    Raises:
+        HTTPException: If there is an error during database operations,
+        an HTTP 500 Internal Server Error is raised.
+        HTTPException: If a maquina is not found,
+        an HTTP 404 Not Found error is raised.
+        HTTPException: If a maquina cannot be created or updated,
+        an HTTP 400 Bad Request error is raised.
+
+    Returns:
+        APIResponse: A response containing the created, updated, or retrieved maquina.
+        APIResponsePaginated: A paginated response containing a list of maquinas.
+        MessageResponse: A response indicating the success of a delete operation.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.maquina import MaquinaBase, MaquinaCreate
@@ -7,8 +25,18 @@ from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Maquinas", tags=["Maquinas"], response_model=APIResponsePaginated[MaquinaBase], dependencies=[Depends(get_current_admin_user)])
-def get_maquinas_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Maquinas",
+    tags=["Maquinas"],
+    response_model=APIResponsePaginated[MaquinaBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
+def get_maquinas_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all maquinas.
     """
@@ -53,7 +81,13 @@ def get_maquinas_endpoint(page: int = Query(1, ge=1, description="Page number"),
         cursor.close()
         db.close()
 
-@router.get("/{maquina_id}", summary="Get Maquina by ID", tags=["Maquinas"], response_model=APIResponse[MaquinaBase], dependencies=[Depends(get_current_admin_user)])
+@router.get(
+    "/{maquina_id}",
+    summary="Get Maquina by ID",
+    tags=["Maquinas"],
+    response_model=APIResponse[MaquinaBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def get_maquina_by_id_endpoint(maquina_id: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a maquina by its ID.
@@ -83,7 +117,13 @@ def get_maquina_by_id_endpoint(maquina_id: int, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create Maquina", tags=["Maquinas"], response_model=APIResponse[MaquinaBase], dependencies=[Depends(get_current_admin_user)])
+@router.post(
+    "/",
+    summary="Create Maquina",
+    tags=["Maquinas"],
+    response_model=APIResponse[MaquinaBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def create_maquina_endpoint(maquina: MaquinaCreate, db=Depends(get_db)):
     """
     Endpoint to create a new maquina.
@@ -94,7 +134,15 @@ def create_maquina_endpoint(maquina: MaquinaCreate, db=Depends(get_db)):
             INSERT INTO maquinas (modelo, id_cliente, ubicacion_cliente, costo_alquiler_mensual)
             VALUES (%s, %s, %s,%s)
         """
-        cursor.execute(insert_query, (maquina.modelo, maquina.id_cliente, maquina.ubicacion_cliente, maquina.costo_alquiler_mensual))
+        cursor.execute(
+            insert_query,
+            (
+                maquina.modelo,
+                maquina.id_cliente,
+                maquina.ubicacion_cliente,
+                maquina.costo_alquiler_mensual
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -120,7 +168,13 @@ def create_maquina_endpoint(maquina: MaquinaCreate, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.put("/{maquina_id}", summary="Update Maquina", tags=["Maquinas"], response_model=APIResponse[MaquinaBase], dependencies=[Depends(get_current_admin_user)])
+@router.put(
+    "/{maquina_id}",
+    summary="Update Maquina",
+    tags=["Maquinas"],
+    response_model=APIResponse[MaquinaBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def update_maquina_endpoint(maquina_id: int, maquina: MaquinaCreate, db=Depends(get_db)):
     """
     Endpoint to update an existing maquina.
@@ -132,7 +186,16 @@ def update_maquina_endpoint(maquina_id: int, maquina: MaquinaCreate, db=Depends(
             SET modelo = %s, id_cliente = %s, ubicacion_cliente = %s, costo_alquiler_mensual = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (maquina.modelo, maquina.id_cliente, maquina.ubicacion_cliente, maquina.costo_alquiler_mensual, maquina_id))
+        cursor.execute(
+            update_query,
+            (
+                maquina.modelo,
+                maquina.id_cliente,
+                maquina.ubicacion_cliente,
+                maquina.costo_alquiler_mensual,
+                maquina_id
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -157,7 +220,13 @@ def update_maquina_endpoint(maquina_id: int, maquina: MaquinaCreate, db=Depends(
         cursor.close()
         db.close()
 
-@router.delete("/{maquina_id}", summary="Delete Maquina", tags=["Maquinas"], response_model=APIResponse[MessageResponse], dependencies=[Depends(get_current_admin_user)])
+@router.delete(
+    "/{maquina_id}",
+    summary="Delete Maquina",
+    tags=["Maquinas"],
+    response_model=APIResponse[MessageResponse],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def delete_maquina_endpoint(maquina_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a maquina by its ID.

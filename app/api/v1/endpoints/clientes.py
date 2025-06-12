@@ -1,5 +1,20 @@
+"""@file
+    This module contains the endpoints for managing clientes in the system.
+    It includes endpoints to create, read, update, and delete clientes,
+
+    Raises:
+        HTTPException: If there is an error with the database connection
+        or if a cliente is not found.
+        HTTPException: If the request is invalid or if the cliente already exists.
+        HTTPException: If the request is malformed or if the cliente data is invalid.
+
+    Returns:
+        APIResponse: A response containing the requested cliente data or a success message.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.cliente import ClienteBase, ClienteCreate
@@ -7,8 +22,17 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Clientes", tags=["Clientes"], response_model=APIResponsePaginated[ClienteBase])
-def get_clientes_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Clientes",
+    tags=["Clientes"],
+    response_model=APIResponsePaginated[ClienteBase]
+)
+def get_clientes_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all clientes.
     """
@@ -53,7 +77,12 @@ def get_clientes_endpoint(page: int = Query(1, ge=1, description="Page number"),
         cursor.close()
         db.close()
 
-@router.get("/{cliente_id}", summary="Get Cliente by ID", tags=["Clientes"], response_model=APIResponse[ClienteBase])
+@router.get(
+    "/{cliente_id}",
+    summary="Get Cliente by ID",
+    tags=["Clientes"],
+    response_model=APIResponse[ClienteBase]
+)
 def get_cliente_by_id_endpoint(cliente_id: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a cliente by its ID.
@@ -83,7 +112,12 @@ def get_cliente_by_id_endpoint(cliente_id: int, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create Cliente", tags=["Clientes"], response_model=APIResponse[ClienteBase])
+@router.post(
+    "/",
+    summary="Create Cliente",
+    tags=["Clientes"],
+    response_model=APIResponse[ClienteBase]
+)
 def create_cliente_endpoint(cliente: ClienteCreate, db=Depends(get_db)):
     """
     Endpoint to create a new cliente.
@@ -94,7 +128,15 @@ def create_cliente_endpoint(cliente: ClienteCreate, db=Depends(get_db)):
             INSERT INTO clientes (nombre, correo, telefono, direccion)
             VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (cliente.nombre, cliente.correo, cliente.telefono, cliente.direccion))
+        cursor.execute(
+            insert_query,
+            (
+                cliente.nombre,
+                cliente.correo,
+                cliente.telefono,
+                cliente.direccion
+            )
+        )
         db.commit()
 
         cliente_id = cursor.lastrowid
@@ -113,7 +155,12 @@ def create_cliente_endpoint(cliente: ClienteCreate, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.put("/{cliente_id}", summary="Update Cliente", tags=["Clientes"], response_model=APIResponse[ClienteBase])
+@router.put(
+    "/{cliente_id}",
+    summary="Update Cliente",
+    tags=["Clientes"],
+    response_model=APIResponse[ClienteBase]
+)
 def update_cliente_endpoint(cliente_id: int, cliente: ClienteCreate, db=Depends(get_db)):
     """
     Endpoint to update an existing cliente.
@@ -125,7 +172,16 @@ def update_cliente_endpoint(cliente_id: int, cliente: ClienteCreate, db=Depends(
             SET nombre = %s, correo = %s, telefono = %s, direccion = %s
             WHERE id = %s
         """
-        cursor.execute(update_query, (cliente.nombre, cliente.correo, cliente.telefono, cliente.direccion, cliente_id))
+        cursor.execute(
+            update_query,
+            (
+                cliente.nombre,
+                cliente.correo,
+                cliente.telefono,
+                cliente.direccion,
+                cliente_id
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -147,7 +203,12 @@ def update_cliente_endpoint(cliente_id: int, cliente: ClienteCreate, db=Depends(
         cursor.close()
         db.close()
 
-@router.delete("/{cliente_id}", summary="Delete Cliente", tags=["Clientes"], response_model=MessageResponse)
+@router.delete(
+    "/{cliente_id}",
+    summary="Delete Cliente",
+    tags=["Clientes"],
+    response_model=MessageResponse
+)
 def delete_cliente_endpoint(cliente_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a cliente by its ID.

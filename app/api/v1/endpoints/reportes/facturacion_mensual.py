@@ -1,14 +1,34 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
+""" Endpoint to retrieve the monthly billing report for a specific client.
 
-from app.schemas.common import APIResponse, MessageResponse
+    Raises:
+        HTTPException: If there is a database connection error or 
+        if no billing data is found for the specified client and date.
+
+    Returns:
+        APIResponse: A response containing the monthly billing report for the client.
+"""
+
+import mysql.connector
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.schemas.common import APIResponse
 from app.schemas.reporte import FacturacionMensualResponse
 from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/{cliente_id}", summary="Get Monthly Billing Report", tags=["Reportes"], response_model=APIResponse[FacturacionMensualResponse])
-def get_monthly_billing_report(cliente_id: int, month: int = Query(..., ge=1, le=12, description="Mes para el reporte (1-12)"), year: int = Query(..., ge=2000, description="Año para el reporte (ej. 2025)"), db=Depends(get_db) ):
+@router.get(
+    "/{cliente_id}",
+    summary="Get Monthly Billing Report",
+    tags=["Reportes"],
+    response_model=APIResponse[FacturacionMensualResponse]
+)
+def get_monthly_billing_report(
+    cliente_id: int,
+    month: int = Query(..., ge=1, le=12, description="Mes para el reporte (1-12)"),
+    year: int = Query(..., ge=2000, description="Año para el reporte (ej. 2025)"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve the monthly billing report for a specific client.
     """

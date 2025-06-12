@@ -1,5 +1,22 @@
+"""Endpoint to manage users.
+    This endpoint allows administrators to create, read, update, and delete users.
+
+    Raises:
+        HTTPException: If there is a database connection error or if a user is not found.
+        HTTPException: If the input data is invalid or if a user already exists.
+        HTTPException: If a user cannot be created or updated due to database constraints.
+        HTTPException: If a user cannot be deleted because it does not exist.
+
+    Returns:
+        APIResponse: A response containing 
+        the requested user data or a success message.
+        APIResponsePaginated: A paginated response
+        containing a list of users.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.user import UserBase, UserCreate, UserUpdate
@@ -7,8 +24,18 @@ from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Users", tags=["Users"], response_model=APIResponsePaginated[UserBase], dependencies=[Depends(get_current_admin_user)])
-def get_users_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Users",
+    tags=["Users"],
+    response_model=APIResponsePaginated[UserBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
+def get_users_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all users.
     """
@@ -53,7 +80,13 @@ def get_users_endpoint(page: int = Query(1, ge=1, description="Page number"), pa
         cursor.close()
         db.close()
 
-@router.get("/{user_correo}", summary="Get User by Email", tags=["Users"], response_model=APIResponse[UserBase], dependencies=[Depends(get_current_admin_user)])
+@router.get(
+    "/{user_correo}",
+    summary="Get User by Email",
+    tags=["Users"],
+    response_model=APIResponse[UserBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def get_user_by_email_endpoint(user_correo: str, db=Depends(get_db)):
     """
     Endpoint to retrieve a user by their email.
@@ -83,7 +116,13 @@ def get_user_by_email_endpoint(user_correo: str, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create User", tags=["Users"], response_model=APIResponse[UserBase], dependencies=[Depends(get_current_admin_user)])
+@router.post(
+    "/",
+    summary="Create User",
+    tags=["Users"],
+    response_model=APIResponse[UserBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def create_user_endpoint(user: UserCreate, db=Depends(get_db)):
     """
     Endpoint to create a new user.
@@ -114,7 +153,13 @@ def create_user_endpoint(user: UserCreate, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.put("/{user_correo}", summary="Update User", tags=["Users"], response_model=APIResponse[UserBase], dependencies=[Depends(get_current_admin_user)])
+@router.put(
+    "/{user_correo}",
+    summary="Update User",
+    tags=["Users"],
+    response_model=APIResponse[UserBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def update_user_endpoint(user_correo: str, user: UserUpdate, db=Depends(get_db)):
     """
     Endpoint to update an existing user by their email.
@@ -145,7 +190,13 @@ def update_user_endpoint(user_correo: str, user: UserUpdate, db=Depends(get_db))
         cursor.close()
         db.close()
 
-@router.delete("/{user_correo}", summary="Delete User", tags=["Users"], response_model=MessageResponse, dependencies=[Depends(get_current_admin_user)])
+@router.delete(
+    "/{user_correo}",
+    summary="Delete User",
+    tags=["Users"],
+    response_model=MessageResponse,
+    dependencies=[Depends(get_current_admin_user)]
+)
 def delete_user_endpoint(user_correo: str, db=Depends(get_db)):
     """
     Endpoint to delete a user by their email.

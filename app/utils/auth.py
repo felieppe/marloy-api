@@ -1,3 +1,13 @@
+"""
+    Create a JWT access token with an expiration time.
+
+    Raises:
+        ValueError: If the token is invalid or has expired.
+
+    Returns:
+        str: The encoded JWT access token.
+    """
+
 from datetime import datetime, timedelta
 from typing import Any
 from jose import jwt
@@ -24,7 +34,7 @@ def decode_access_token(token: str) -> Any:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         return payload
-    except jwt.ExpiredSignatureError:
-        raise ValueError("Token has expired")
+    except jwt.ExpiredSignatureError as exc:
+        raise ValueError("Token has expired") from exc
     except jwt.JWTError as e:
-        raise ValueError(f"Invalid token: {e}")
+        raise ValueError(f"Invalid token: {e}") from e

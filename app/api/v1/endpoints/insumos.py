@@ -1,5 +1,16 @@
+""" Endpoint to retrieve all insumos with pagination.
+    This endpoint allows you to retrieve a paginated list of insumos.
+
+    Raises:
+        HTTPException: If there is an error with the database connection,
+
+    Returns:
+        APIResponsePaginated: A paginated response containing the insumos.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.insumo import InsumoBase, InsumoCreate, InsumoUpdate
@@ -7,25 +18,34 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Insumos", tags=["Insumos"], response_model=APIResponsePaginated[InsumoBase])
-def get_insumos_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Insumos",
+    tags=["Insumos"],
+    response_model=APIResponsePaginated[InsumoBase]
+)
+def get_insumos_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all insumos.
     """
     try:
         cursor = db.cursor(dictionary=True)
-        
+
         count_query = "SELECT COUNT(*) as total FROM insumos"
         cursor.execute(count_query)
         total_items = cursor.fetchone()['total']
-        
+
         offset = (page - 1) * page_size
         query = "SELECT * FROM insumos LIMIT %s OFFSET %s"
         cursor.execute(query, (page_size, offset))
 
         insumos = cursor.fetchall()
         total_pages = math.ceil(total_items / page_size) if total_items > 0 else 1
-        
+
         if not insumos:
             return APIResponsePaginated(
                 success=True,
@@ -52,8 +72,13 @@ def get_insumos_endpoint(page: int = Query(1, ge=1, description="Page number"), 
     finally:
         cursor.close()
         db.close()
-        
-@router.get("/{insumo_id}", summary="Get Insumo by ID", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+
+@router.get(
+    "/{insumo_id}",
+    summary="Get Insumo by ID",
+    tags=["Insumos"],
+    response_model=APIResponse[InsumoBase]
+)
 def get_insumo_by_id_endpoint(insumo_id: int, db=Depends(get_db)):
     """
     Endpoint to retrieve an insumo by its ID.
@@ -82,8 +107,13 @@ def get_insumo_by_id_endpoint(insumo_id: int, db=Depends(get_db)):
     finally:
         cursor.close()
         db.close()
-        
-@router.post("/", summary="Create Insumo", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+
+@router.post(
+    "/",
+    summary="Create Insumo",
+    tags=["Insumos"],
+    response_model=APIResponse[InsumoBase]
+)
 def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
     """
     Endpoint to create a new insumo.
@@ -104,16 +134,38 @@ def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
             INSERT INTO insumos (descripcion, tipo, precio_unitario, id_proveedor)
             VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor))
+        cursor.execute(
+            query,
+            (
+                insumo.descripcion,
+                insumo.tipo,
+                insumo.precio_unitario,
+                insumo.id_proveedor
+            )
+        )
         db.commit()
-        
+
         if cursor.rowcount == 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Failed to create insumo"
             )
 
-        cursor.execute("SELECT * FROM insumos WHERE descripcion = %s AND tipo = %s AND precio_unitario = %s AND id_proveedor = %s", (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor,))
+        cursor.execute(
+            """
+                SELECT * FROM insumos 
+                WHERE descripcion = %s 
+                AND tipo = %s 
+                AND precio_unitario = %s 
+                AND id_proveedor = %s
+            """,
+            (
+                insumo.descripcion,
+                insumo.tipo,
+                insumo.precio_unitario,
+                insumo.id_proveedor,
+            )
+        )
         created_insumo = cursor.fetchone()
 
         return APIResponse(
@@ -128,8 +180,13 @@ def create_insumo_endpoint(insumo: InsumoCreate, db=Depends(get_db)):
     finally:
         cursor.close()
         db.close()
-        
-@router.put("/{insumo_id}", summary="Update Insumo", tags=["Insumos"], response_model=APIResponse[InsumoBase])
+
+@router.put(
+    "/{insumo_id}",
+    summary="Update Insumo",
+    tags=["Insumos"],
+    response_model=APIResponse[InsumoBase]
+)
 def update_insumo_endpoint(insumo_id: int, insumo: InsumoUpdate, db=Depends(get_db)):
     """
     Endpoint to update an existing insumo.
@@ -141,7 +198,16 @@ def update_insumo_endpoint(insumo_id: int, insumo: InsumoUpdate, db=Depends(get_
             SET descripcion = %s, tipo = %s, precio_unitario = %s, id_proveedor = %s
             WHERE id = %s
         """
-        cursor.execute(query, (insumo.descripcion, insumo.tipo, insumo.precio_unitario, insumo.id_proveedor, insumo_id))
+        cursor.execute(
+            query,
+            (
+                insumo.descripcion,
+                insumo.tipo,
+                insumo.precio_unitario,
+                insumo.id_proveedor,
+                insumo_id
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -149,7 +215,7 @@ def update_insumo_endpoint(insumo_id: int, insumo: InsumoUpdate, db=Depends(get_
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Insumo not found"
             )
-        
+
         cursor.execute("SELECT * FROM insumos WHERE id = %s", (insumo_id,))
         updated_insumo = cursor.fetchone()
 
@@ -171,19 +237,24 @@ def update_insumo_endpoint(insumo_id: int, insumo: InsumoUpdate, db=Depends(get_
     finally:
         cursor.close()
         db.close()
-        
-@router.delete("/{insumo_id}", summary="Delete Insumo", tags=["Insumos"], response_model=APIResponse[MessageResponse])
+
+@router.delete(
+    "/{insumo_id}",
+    summary="Delete Insumo",
+    tags=["Insumos"],
+    response_model=APIResponse[MessageResponse]
+)
 def delete_insumo_endpoint(insumo_id: int, db=Depends(get_db)):
     """
     Endpoint to delete an insumo by its ID.
     """
     try:
         cursor = db.cursor(dictionary=True)
-        
+
         query = "DELETE FROM registro_consumo WHERE id_insumo = %s"
         cursor.execute(query, (insumo_id,))
         db.commit()
-        
+
         query = "DELETE FROM insumos WHERE id = %s"
         cursor.execute(query, (insumo_id,))
         db.commit()

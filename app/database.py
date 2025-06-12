@@ -1,3 +1,14 @@
+""" 
+    Get a MySQL database connection.
+    This function establishes a connection to the MySQL database using the configuration
+
+    Returns:
+        mysql.connector.connection.MySQLConnection: A MySQL connection object.
+        
+    Raises:
+        mysql.connector.Error: If there is an error connecting to the database.
+"""
+
 import mysql.connector
 from app.config import settings
 

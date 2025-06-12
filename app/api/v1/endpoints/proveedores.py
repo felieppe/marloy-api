@@ -1,5 +1,24 @@
+"""Endpoints for managing proveedores.
+    This module provides endpoints to create, read, update, and delete proveedores.
+    It includes pagination for listing proveedores and handles database operations.
+
+    Raises:
+        HTTPException: If there is an error during database operations,
+        an HTTP 500 Internal Server Error is raised.
+        HTTPException: If a proveedor is not found,
+        an HTTP 404 Not Found error is raised.
+        HTTPException: If a proveedor cannot be created or updated,
+        an HTTP 400 Bad Request error is raised.
+
+    Returns:
+        APIResponse: A response containing the created, updated, or retrieved proveedor.
+        APIResponsePaginated: A paginated response containing a list of proveedores.
+        MessageResponse: A response indicating the success of a delete operation.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.proveedor import ProveedorBase, ProveedorCreate, ProveedorUpdate
@@ -7,8 +26,18 @@ from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Proveedores", tags=["Proveedores"], response_model=APIResponsePaginated[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
-def get_proveedores_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Proveedores",
+    tags=["Proveedores"],
+    response_model=APIResponsePaginated[ProveedorBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
+def get_proveedores_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all proveedores.
     """
@@ -52,8 +81,14 @@ def get_proveedores_endpoint(page: int = Query(1, ge=1, description="Page number
     finally:
         cursor.close()
         db.close()
-        
-@router.get("/{proveedor_id}", summary="Get Proveedor by ID", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
+
+@router.get(
+    "/{proveedor_id}",
+    summary="Get Proveedor by ID",
+    tags=["Proveedores"],
+    response_model=APIResponse[ProveedorBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def get_proveedor_by_id_endpoint(proveedor_id: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a proveedor by its ID.
@@ -82,8 +117,14 @@ def get_proveedor_by_id_endpoint(proveedor_id: int, db=Depends(get_db)):
     finally:
         cursor.close()
         db.close()
-        
-@router.post("/", summary="Create Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
+
+@router.post(
+    "/",
+    summary="Create Proveedor",
+    tags=["Proveedores"],
+    response_model=APIResponse[ProveedorBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
     """
     Endpoint to create a new proveedor.
@@ -107,8 +148,14 @@ def create_proveedor_endpoint(proveedor: ProveedorCreate, db=Depends(get_db)):
     finally:
         cursor.close()
         db.close()
-        
-@router.put("/{proveedor_id}", summary="Update Proveedor", tags=["Proveedores"], response_model=APIResponse[ProveedorBase], dependencies=[Depends(get_current_admin_user)])
+
+@router.put(
+    "/{proveedor_id}",
+    summary="Update Proveedor",
+    tags=["Proveedores"],
+    response_model=APIResponse[ProveedorBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorUpdate, db=Depends(get_db)):
     """
     Endpoint to update an existing proveedor.
@@ -137,8 +184,14 @@ def update_proveedor_endpoint(proveedor_id: int, proveedor: ProveedorUpdate, db=
     finally:
         cursor.close()
         db.close()
-        
-@router.delete("/{proveedor_id}", summary="Delete Proveedor", tags=["Proveedores"], response_model=APIResponse[MessageResponse], dependencies=[Depends(get_current_admin_user)])
+
+@router.delete(
+    "/{proveedor_id}",
+    summary="Delete Proveedor",
+    tags=["Proveedores"],
+    response_model=APIResponse[MessageResponse],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def delete_proveedor_endpoint(proveedor_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a proveedor by its ID.

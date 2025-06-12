@@ -1,5 +1,21 @@
+"""Endpoints for managing tecnicos.
+    This module provides endpoints to create, read, update, and delete tecnicos.
+
+    Raises:
+        HTTPException: If there is a database connection error or if a tecnico is not found.
+        HTTPException: If the input data is invalid or if a tecnico already exists.
+        HTTPException: If a tecnico cannot be created or updated due to database constraints.
+        HTTPException: If a tecnico cannot be deleted because it does not exist.
+        HTTPException: If a tecnico cannot be retrieved because it does not exist.
+
+    Returns:
+        APIResponse: A response containing the requested tecnico data or a success message.
+        APIResponsePaginated: A paginated response containing a list of tecnicos.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.tecnico import TecnicoBase, TecnicoCreate
@@ -7,8 +23,18 @@ from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Tecnicos", tags=["Tecnicos"], response_model=APIResponsePaginated[TecnicoBase], dependencies=[Depends(get_current_admin_user)])
-def get_tecnicos_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Tecnicos",
+    tags=["Tecnicos"],
+    response_model=APIResponsePaginated[TecnicoBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
+def get_tecnicos_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all tecnicos.
     """
@@ -53,7 +79,13 @@ def get_tecnicos_endpoint(page: int = Query(1, ge=1, description="Page number"),
         cursor.close()
         db.close()
 
-@router.get("/{tecnico_ci}", summary="Get Tecnico by CI", tags=["Tecnicos"], response_model=APIResponse[TecnicoBase], dependencies=[Depends(get_current_admin_user)])
+@router.get(
+    "/{tecnico_ci}",
+    summary="Get Tecnico by CI",
+    tags=["Tecnicos"],
+    response_model=APIResponse[TecnicoBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def get_tecnico_by_id_endpoint(tecnico_ci: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a tecnico by its CI.
@@ -83,7 +115,13 @@ def get_tecnico_by_id_endpoint(tecnico_ci: int, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create Tecnico", tags=["Tecnicos"], response_model=APIResponse[TecnicoBase], dependencies=[Depends(get_current_admin_user)])
+@router.post(
+    "/",
+    summary="Create Tecnico",
+    tags=["Tecnicos"],
+    response_model=APIResponse[TecnicoBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def create_tecnico_endpoint(tecnico: TecnicoCreate, db=Depends(get_db)):
     """
     Endpoint to create a new tecnico.
@@ -94,10 +132,17 @@ def create_tecnico_endpoint(tecnico: TecnicoCreate, db=Depends(get_db)):
             INSERT INTO tecnicos (ci, nombre, apellido, telefono)
             VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (tecnico.ci, tecnico.nombre, tecnico.apellido, tecnico.telefono))
+        cursor.execute(
+            insert_query,
+            (
+                tecnico.ci,
+                tecnico.nombre,
+                tecnico.apellido,
+                tecnico.telefono
+            )
+        )
         db.commit()
 
-        # Retrieve the created tecnico
         cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico.ci,))
         created_tecnico = cursor.fetchone()
 
@@ -120,7 +165,13 @@ def create_tecnico_endpoint(tecnico: TecnicoCreate, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.put("/{tecnico_id}", summary="Update Tecnico", tags=["Tecnicos"], response_model=APIResponse[TecnicoBase], dependencies=[Depends(get_current_admin_user)])
+@router.put(
+    "/{tecnico_id}",
+    summary="Update Tecnico",
+    tags=["Tecnicos"],
+    response_model=APIResponse[TecnicoBase],
+    dependencies=[Depends(get_current_admin_user)]
+)
 def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(get_db)):
     """
     Endpoint to update an existing tecnico.
@@ -132,7 +183,15 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
             SET nombre = %s, apellido = %s, telefono = %s
             WHERE ci = %s
         """
-        cursor.execute(update_query, (tecnico.nombre, tecnico.apellido, tecnico.telefono, tecnico_id))
+        cursor.execute(
+            update_query,
+            (
+                tecnico.nombre,
+                tecnico.apellido,
+                tecnico.telefono,
+                tecnico_id
+            )
+        )
         db.commit()
 
         if cursor.rowcount == 0:
@@ -141,7 +200,6 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
                 detail="Tecnico not found"
             )
 
-        # Retrieve the updated tecnico
         cursor.execute("SELECT * FROM tecnicos WHERE ci = %s", (tecnico_id,))
         updated_tecnico = cursor.fetchone()
 
@@ -158,7 +216,13 @@ def update_tecnico_endpoint(tecnico_id: int, tecnico: TecnicoCreate, db=Depends(
         cursor.close()
         db.close()
 
-@router.delete("/{tecnico_id}", summary="Delete Tecnico", tags=["Tecnicos"], response_model=MessageResponse, dependencies=[Depends(get_current_admin_user)])
+@router.delete(
+    "/{tecnico_id}",
+    summary="Delete Tecnico",
+    tags=["Tecnicos"],
+    response_model=MessageResponse,
+    dependencies=[Depends(get_current_admin_user)]
+)
 def delete_tecnico_endpoint(tecnico_id: int, db=Depends(get_db)):
     """
     Endpoint to delete a tecnico by its CI.

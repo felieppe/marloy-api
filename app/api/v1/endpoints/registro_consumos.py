@@ -1,5 +1,23 @@
+"""Endpoints for managing registros de consumo.
+    This module provides endpoints to create, read, update, and delete registros de consumo.
+
+    Raises:
+        HTTPException: If there is an error during database operations,
+        an HTTP 500 Internal Server Error is raised.
+        HTTPException: If a registro de consumo is not found,
+        an HTTP 404 Not Found error is raised.
+        HTTPException: If a registro de consumo cannot be created or updated,
+        an HTTP 400 Bad Request error is raised.
+
+    Returns:
+        APIResponse: A response containing the created, updated, or retrieved registro de consumo.
+        APIResponsePaginated: A paginated response containing a list of registros de consumo.
+        MessageResponse: A response indicating the success of a delete operation.
+"""
+
+import math
+import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-import mysql.connector, math
 
 from app.schemas.common import APIResponse, MessageResponse, APIResponsePaginated
 from app.schemas.registro_consumo import RegistroConsumoBase, RegistroConsumoCreate
@@ -7,8 +25,17 @@ from app.dependencies import get_db
 
 router = APIRouter()
 
-@router.get("/", summary="Get Registros de Consumo", tags=["Registros de Consumo"], response_model=APIResponsePaginated[RegistroConsumoBase])
-def get_registros_consumo_endpoint(page: int = Query(1, ge=1, description="Page number"), page_size: int = Query(10, ge=1, le=100, description="Items per page"), db=Depends(get_db)):
+@router.get(
+    "/",
+    summary="Get Registros de Consumo",
+    tags=["Registros de Consumo"],
+    response_model=APIResponsePaginated[RegistroConsumoBase]
+)
+def get_registros_consumo_endpoint(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve all registros de consumo.
     """
@@ -53,7 +80,12 @@ def get_registros_consumo_endpoint(page: int = Query(1, ge=1, description="Page 
         cursor.close()
         db.close()
 
-@router.get("/{id_consumo}", summary="Get Registro de Consumo by ID", tags=["Registros de Consumo"], response_model=APIResponse[RegistroConsumoBase])
+@router.get(
+    "/{id_consumo}",
+    summary="Get Registro de Consumo by ID",
+    tags=["Registros de Consumo"],
+    response_model=APIResponse[RegistroConsumoBase]
+)
 def get_registro_consumo_by_id_endpoint(id_consumo: int, db=Depends(get_db)):
     """
     Endpoint to retrieve a registro de consumo by its ID.
@@ -83,7 +115,12 @@ def get_registro_consumo_by_id_endpoint(id_consumo: int, db=Depends(get_db)):
         cursor.close()
         db.close()
 
-@router.post("/", summary="Create Registro de Consumo", tags=["Registros de Consumo"], response_model=APIResponse[RegistroConsumoBase])
+@router.post(
+    "/",
+    summary="Create Registro de Consumo",
+    tags=["Registros de Consumo"],
+    response_model=APIResponse[RegistroConsumoBase]
+)
 def create_registro_consumo_endpoint(registro_consumo: RegistroConsumoCreate, db=Depends(get_db)):
     """
     Endpoint to create a new registro de consumo.
@@ -117,8 +154,17 @@ def create_registro_consumo_endpoint(registro_consumo: RegistroConsumoCreate, db
         cursor.close()
         db.close()
 
-@router.put("/{id_consumo}", summary="Update Registro de Consumo", tags=["Registros de Consumo"], response_model=APIResponse[RegistroConsumoBase])
-def update_registro_consumo_endpoint(id_consumo: int, registro_consumo: RegistroConsumoCreate, db=Depends(get_db)):
+@router.put(
+    "/{id_consumo}",
+    summary="Update Registro de Consumo",
+    tags=["Registros de Consumo"],
+    response_model=APIResponse[RegistroConsumoBase]
+)
+def update_registro_consumo_endpoint(
+    id_consumo: int,
+    registro_consumo: RegistroConsumoCreate,
+    db=Depends(get_db)
+):
     """
     Endpoint to update an existing registro de consumo.
     """
@@ -159,7 +205,12 @@ def update_registro_consumo_endpoint(id_consumo: int, registro_consumo: Registro
         cursor.close()
         db.close()
 
-@router.delete("/{id_consumo}", summary="Delete Registro de Consumo", tags=["Registros de Consumo"], response_model=MessageResponse)
+@router.delete(
+    "/{id_consumo}",
+    summary="Delete Registro de Consumo",
+    tags=["Registros de Consumo"],
+    response_model=MessageResponse
+)
 def delete_registro_consumo_endpoint(id_consumo: int, db=Depends(get_db)):
     """
     Endpoint to delete a registro de consumo by its ID.

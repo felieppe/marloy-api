@@ -1,6 +1,11 @@
+"""
+    Common response schemas for API responses.
+    This module defines common response models used across the application.
+"""
+
+import time
 from typing import TypeVar, Generic
 from pydantic import BaseModel
-import time
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -9,7 +14,7 @@ class MessageResponse(BaseModel):
     Message response model.
     """
     message: str
-    
+
 class PaginatedResponse(BaseModel, Generic[T]):
     """
     Paginated response model.
@@ -27,7 +32,13 @@ class APIResponse(BaseModel, Generic[T]):
     success: bool
     data: T | list[T] | MessageResponse | None = None
     timestamp: int = int(time.time())
+
 class APIResponsePaginated(BaseModel, Generic[T]):
+    """
+    Base API response model for paginated data.
+    This model is used to standardize the response structure for paginated endpoints.
+    """
+
     success: bool
     data: list[T] | MessageResponse | None = None
     total_items: int = 0

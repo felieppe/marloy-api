@@ -1,8 +1,23 @@
-from fastapi import HTTPException, Depends, status
-from app.database import get_database_connection
-from fastapi.security import OAuth2PasswordBearer
-import mysql.connector
+"""
+    Dependency functions for FastAPI application.
+    This module provides dependencies for database connections and user authentication.
 
+    Raises:
+        HTTPException: If there is a database connection error or if the user is not authenticated.
+
+    Returns:
+        Generator: A generator that yields a database connection or the current user.
+
+    Yields:
+        mysql.connector.connection.MySQLConnection: A MySQL database connection.
+        dict: The current user information extracted from the JWT token.
+"""
+
+import mysql.connector
+from fastapi import HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer
+
+from app.database import get_database_connection
 from app.utils.auth import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/login")
@@ -16,16 +31,16 @@ def get_db():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database connection error: {err}"
-        )
+        ) from err
     finally:
         if connection.is_connected():
             connection.close()
-            
+
 def get_current_user(token : str = Depends(oauth2_scheme)):
     """
     Dependency to get the current user from the JWT token.
     """
-    
+
     try:
         payload = decode_access_token(token)
         if not payload:
@@ -34,7 +49,7 @@ def get_current_user(token : str = Depends(oauth2_scheme)):
                 detail="Invalid authentication credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         return payload
     except Exception as e:
         raise HTTPException(
@@ -52,5 +67,5 @@ def get_current_admin_user(current_user: dict = Depends(get_current_user)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to perform this action",
         )
-    
+
     return current_user

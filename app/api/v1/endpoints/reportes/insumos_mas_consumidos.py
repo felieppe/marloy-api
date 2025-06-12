@@ -1,5 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+"""Endpoint to retrieve the most consumed supplies.
+
+    Raises:
+        HTTPException: If there is a database connection error or if no consumption data is found.
+
+    Returns:
+        APIResponse: A response containing a list
+        of the most consumed supplies with their total quantities and costs.
+"""
+
 import mysql.connector
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.schemas.common import APIResponse
 from app.schemas.reporte import InsumosMasConsumidosResponse
@@ -7,8 +17,17 @@ from app.dependencies import get_db, get_current_admin_user
 
 router = APIRouter()
 
-@router.get("/", summary="Get Most Consumed Supplies", tags=["Reportes"], response_model=APIResponse[list[InsumosMasConsumidosResponse]], dependencies=[Depends(get_current_admin_user)])
-def get_most_consumed_supplies(limit: int = Query(10, ge=1, description="Max return of insumos"), db=Depends(get_db) ):
+@router.get(
+    "/",
+    summary="Get Most Consumed Supplies",
+    tags=["Reportes"],
+    response_model=APIResponse[list[InsumosMasConsumidosResponse]],
+    dependencies=[Depends(get_current_admin_user)]
+)
+def get_most_consumed_supplies(
+    limit: int = Query(10, ge=1, description="Max return of insumos"),
+    db=Depends(get_db)
+):
     """
     Endpoint to retrieve the most consumed supplies for a specific month and year.
     """
@@ -34,7 +53,7 @@ def get_most_consumed_supplies(limit: int = Query(10, ge=1, description="Max ret
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No consumption data found."
             )
-        
+
         response_data = [InsumosMasConsumidosResponse(**item) for item in result]
 
         return APIResponse(success=True, data=response_data)
