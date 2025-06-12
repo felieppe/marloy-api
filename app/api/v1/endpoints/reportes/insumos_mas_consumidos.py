@@ -8,6 +8,7 @@
         of the most consumed supplies with their total quantities and costs.
 """
 
+from typing import List
 import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -21,7 +22,7 @@ router = APIRouter()
     "/",
     summary="Get Most Consumed Supplies",
     tags=["Reportes"],
-    response_model=APIResponse[list[InsumosMasConsumidosResponse]],
+    response_model=APIResponse[List[InsumosMasConsumidosResponse]],
     dependencies=[Depends(get_current_admin_user)]
 )
 def get_most_consumed_supplies(

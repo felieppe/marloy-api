@@ -8,6 +8,7 @@
         APIResponse: A response containing a list of clients with their machine counts.
 """
 
+from typing import List
 import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -21,7 +22,7 @@ router = APIRouter()
     "/",
     summary="Get Clients with Most Machines",
     tags=["Reportes"],
-    response_model=APIResponse[list[ClientesMasMaquinasResponse]],
+    response_model=APIResponse[List[ClientesMasMaquinasResponse]],
     dependencies=[Depends(get_current_admin_user)]
 )
 def get_clients_with_most_machines(

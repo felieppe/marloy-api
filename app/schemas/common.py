@@ -4,7 +4,7 @@
 """
 
 import time
-from typing import TypeVar, Generic
+from typing import List, TypeVar, Generic
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
@@ -19,7 +19,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
     """
     Paginated response model.
     """
-    items: list[T]
+    items: List[T]
     total_items: int
     page: int
     page_size: int
@@ -30,7 +30,7 @@ class APIResponse(BaseModel, Generic[T]):
     Base API response model.
     """
     success: bool
-    data: T | list[T] | MessageResponse | None = None
+    data: T | List[T] | MessageResponse | None = None
     timestamp: int = int(time.time())
 
 class APIResponsePaginated(BaseModel, Generic[T]):
@@ -40,7 +40,7 @@ class APIResponsePaginated(BaseModel, Generic[T]):
     """
 
     success: bool
-    data: list[T] | MessageResponse | None = None
+    data: List[T] | MessageResponse | None = None
     total_items: int = 0
     page: int = 1
     page_size: int = 10

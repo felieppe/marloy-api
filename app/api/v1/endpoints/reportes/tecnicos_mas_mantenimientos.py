@@ -9,6 +9,7 @@
         APIResponse: A response containing a list of technicians with their maintenance counts.
 """
 
+from typing import List
 import mysql.connector
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -22,7 +23,7 @@ router = APIRouter()
     "/",
     summary="Get Technicians with Most Maintenances",
     tags=["Reportes"],
-    response_model=APIResponse[list[TecnicosMasMantenimientosResponse]],
+    response_model=APIResponse[List[TecnicosMasMantenimientosResponse]],
     dependencies=[Depends(get_current_admin_user)]
 )
 def get_technicians_with_most_maintenances(
