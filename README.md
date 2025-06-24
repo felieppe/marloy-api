@@ -74,51 +74,16 @@ Sigue estos pasos para poner en marcha el sistema en tu entorno de desarrollo lo
 
 1. Clonar el Repositorio:  
    Abre tu terminal y clona este repositorio:  
-   git clone https://github.com/felieppe/marloy-api
-   cd marloy-api
- 
-2. Configurar Variables de Entorno:  
-   Crea un archivo llamado .env en la raíz del proyecto (al mismo nivel que docker-compose.yml). Este archivo contendrá las credenciales de la base de datos y la clave secreta para la generación de JWT.**¡ADVERTENCIA:** Este archivo contiene información sensible y **NO debe ser subido a tu repositorio Git\!** Asegúrate de que .gitignore lo excluya.  
-   \# .env  
-   \# Variables para la aplicación FastAPI  
-   DATABASE\_HOST=db \# Nombre del servicio de la base de datos en Docker Compose  
-   DATABASE\_USER=myuser  
-   DATABASE\_PASSWORD=mypassword  
-   DATABASE\_NAME=fastapi\_db
-
-   \# Variables para el servicio MySQL de Docker Compose  
-   MYSQL\_ROOT\_PASSWORD=root\_password\_segura \# Contraseña para el usuario 'root' de MySQL  
-   MYSQL\_DATABASE=fastapi\_db         \# Nombre de la base de datos a crear  
-   MYSQL\_USER=myuser                 \# Nombre del usuario de la BD que usará la app  
-   MYSQL\_PASSWORD=mypassword         \# Contraseña del usuario de la BD
-
-   \# Configuración JWT  
-   SECRET\_KEY=tu\_clave\_secreta\_super\_segura\_y\_aleatoria \# ¡IMPORTANTE: Genera una cadena aleatoria y fuerte\!  
-   ALGORITHM=HS256 \# Algoritmo de hashing para JWT (ej. HS256)  
-   ACCESS\_TOKEN\_EXPIRE\_MINUTES=30 \# Duración del token de acceso en minutos
-
-   * **SECRET\_KEY**: Es crucial generar una cadena alfanumérica larga y aleatoria para esta clave. Puedes usar herramientas como openssl rand \-hex 32 en sistemas Linux/macOS o generadores de claves online.  
-   * **MYSQL\_ROOT\_PASSWORD**: Contraseña para el usuario root de MySQL dentro del contenedor.  
-   * **MYSQL\_DATABASE, MYSQL\_USER, MYSQL\_PASSWORD**: Credenciales que tu aplicación FastAPI utilizará para conectarse a la base de datos MySQL.  
-3. Preparar la Base de Datos Inicial:  
-   El archivo init.sql (ubicado en la raíz del proyecto) contiene el script SQL para crear la base de datos cafes\_marloy\_db y todas las tablas necesarias (login, proveedores, insumos, clientes, maquinas, registro\_consumo, tecnicos, mantenimientos), así como datos maestros iniciales.**Importante sobre Contraseñas en init.sql:** Las contraseñas de los usuarios de login en init.sql (ej. para admin@marloy.com) **DEBEN estar hasheadas con bcrypt**. Para generar un hash para una contraseña (ej. "adminpass"), puedes ejecutar el siguiente script Python una vez:  
-   from passlib.context import CryptContext  
-   pwd\_context \= CryptContext(schemes=\["bcrypt"\], deprecated="auto")  
-   print(pwd\_context.hash("adminpass"))
-
-   Luego, copia el hash generado y reemplaza el valor de la contraseña en el INSERT de la tabla login en tu init.sql.  
-4. Construir y Ejecutar los Contenedores Docker:  
-   Desde la raíz de tu proyecto (donde se encuentran docker-compose.yml, Dockerfile y .env), ejecuta el siguiente comando:  
-   docker-compose up \--build \-d
-
-   * \--build: Fuerza la reconstrucción de la imagen de tu aplicación (app) incluso si ya existe. Esto es esencial la primera vez o después de realizar cambios en Dockerfile o requirements.txt.  
-   * \-d: Ejecuta los servicios en modo *detached* (en segundo plano), liberando tu terminal.  
-5. Verificar el Estado de los Contenedores:  
+   ```git clone https://github.com/felieppe/marloy-api```
+   ```cd marloy-api```
+2. Inicializamos la instancia de Docker: 
+   ```docker compose up –build```
+3. Verificar el Estado de los Contenedores:  
    Puedes verificar que los servicios (app y db) estén corriendo correctamente con:  
-   docker-compose ps
+   ```docker-compose ps```
 
    Deberías ver ambos servicios con estado Up.  
-6. Acceder a la API:  
+4. Acceder a la API:  
    Una vez que los contenedores estén en funcionamiento, tu API de FastAPI estará disponible en:  
    http://localhost:8000/
 
@@ -126,9 +91,9 @@ Sigue estos pasos para poner en marcha el sistema en tu entorno de desarrollo lo
    http://localhost:8000/docs
 
    Desde aquí, podrás explorar y probar todos los endpoints definidos en la API.  
-7. Detener los Contenedores:  
+5. Detener los Contenedores:  
    Para detener y remover los contenedores (conservando los datos de la base de datos en un volumen persistente):  
-   docker-compose down
+   ```docker-compose down```
 
    Si deseas detener y remover los contenedores, redes y **eliminar los volúmenes de datos** (lo que borrará permanentemente la base de datos):  
    docker-compose down \-v
